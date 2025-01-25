@@ -63,7 +63,7 @@ router.post("/login", async (req, res) => {
         return res.status(403).json({
             message: "User is not registered.",
             error: true
-        }) ;
+        });
 
     const isPasswordValid = await bcrypt.compare(value.password, user.password);
     if (!isPasswordValid)
@@ -88,6 +88,7 @@ router.post('/google', async (req, res) => {
     if (!user) {
         user = new Usermodel({ email, fullName, password: "google" });
         user = await user.save();
+        user = Usermodel.findOne({ email: email }).lean()
         let token = jwt.sign(user, process.env.AUTH_SECRET);
         res.status(200).json({
             data: { user, token },
