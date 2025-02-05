@@ -7,7 +7,7 @@ const router = express.Router()
 router.post('/', authenticateUser, async (req, res) => {
     try {
         const { todo } = req.body
-        let newTodo = new Todomodel({ todo: todo, user: req.user._id })
+        let newTodo = new Todomodel({ todo: todo, user: req.user._id, completed: "false" })
         newTodo = await newTodo.save()
         res.status(201).json({
             data: newTodo,
@@ -69,6 +69,34 @@ router.put('/:id', authenticateUser, async (req, res) => {
 
         const todoToUpdate = await Todomodel.findByIdAndUpdate(req.params.id, { todo })
         todoToUpdate.todo = todo
+        res.status(200).json({
+            data: todoToUpdate,
+            message: "Todo updated successfully",
+            error: false,
+        })
+    }
+    else {
+        res.status(200).json({
+            message: "You are not the ownner of this todo.",
+            error: false,
+        })
+
+    }
+
+})
+
+router.put('/updateComplete/:id', authenticateUser, async (req, res) => {
+    const { completed } = req.body
+    const checkTodo = await Todomodel.findOne({ _id: req.params.id })
+    if (!checkTodo) return res.status(404).json({
+        message: "Todo not found",
+        error: true,
+    })
+
+    if (req.user._id == checkTodo.user.toString()) {
+
+        const todoToUpdate = await Todomodel.findByIdAndUpdate(req.params.id, { completed })
+        todoToUpdate.completed = completed
         res.status(200).json({
             data: todoToUpdate,
             message: "Todo updated successfully",
