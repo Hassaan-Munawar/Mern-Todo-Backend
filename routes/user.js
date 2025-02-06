@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(value.password, 12);
     value.password = hashedPassword;
 
-    let newUser = new Usermodel({ ...value });
+    let newUser = new Usermodel({ ...value, picture: "https://cdn-icons-png.flaticon.com/512/149/149071.png" });
     newUser = await newUser.save();
     const finduser = await Usermodel.findOne({ email: value.email }).lean();
 
@@ -83,10 +83,10 @@ router.post("/login", async (req, res) => {
 });
 
 router.post('/google', async (req, res) => {
-    const { email, fullName } = req.body;
+    const { email, fullName, picture } = req.body;
     let user = await Usermodel.findOne({ email: email }).lean();
     if (!user) {
-        user = new Usermodel({ email, fullName, password: "google" });
+        user = new Usermodel({ email, picture, fullName, password: "google" });
         user = await user.save();
         user = Usermodel.findOne({ email: email }).lean()
         let token = jwt.sign(user, process.env.AUTH_SECRET);
